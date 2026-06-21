@@ -8,7 +8,7 @@ Projeto de **prática de provisionamento** de uma aplicação na **Cloudflare**.
 
 Veículo da prática: a **primeira landing page freelance** do dono do projeto — página comercial para um **cliente real pagante** (lead em andamento, **ainda não fechado** formalmente). Objetivo ponta a ponta: **desenvolvimento → provisionamento → entrega/handoff ao cliente**.
 
-Dedicação: ~10–15h/semana. Roadmap de aprendizado Cloudflare Pages com **9 módulos**; estágio atual: **Módulo 1 — Fundamentos e primeiro deploy**.
+Dedicação: ~10–15h/semana. Roadmap de aprendizado Cloudflare Pages com **9 módulos**; estágio atual: **Módulo 2 — Deploys, previews, ambientes e rollback**.
 
 ## 🏗️ Arquitetura
 
@@ -27,12 +27,14 @@ Dedicação: ~10–15h/semana. Roadmap de aprendizado Cloudflare Pages com **9 m
 - **Local do projeto (decidido):** o projeto Astro **é a raiz de `/workspace`** — bind-mount persistente do host `/home/samuel/code/constantino/my-landing-page`. `GRIMOIRE.md` + `.agentic/` + `taskfile.yml` convivem na raiz e são **versionados** (disponíveis para outros devs). Limpeza do entregável para o cliente, se necessária, será tratada no handoff (filtro/export), não por diretório separado. Ver lição de persistência nas Notas.
 - `.nvmrc` com `22` na raiz — **Astro 6 exige Node ≥ 22.12**; o build remoto da Cloudflare lê `.nvmrc`. Sem ele, o build pode falhar usando Node antigo. (Ambiente sandbox já tem Node v24.14.1, que satisfaz o piso.)
 - Build settings no painel Cloudflare (preset Astro autopreenche): build command `npm run build`, output dir `dist`.
-- ⚠️ **Nome do projeto Cloudflare / subdomínio `*.pages.dev` — pendente:** o handoff usava `minha-landing`; a pasta do host virou `my-landing-page`. Decidir no passo 6 (afeta `--project-name` e a URL pública). O `name` do `package.json` já foi alinhado a `my-landing-page`.
+- **Nome do projeto Cloudflare:** `my-landing-page-3iz` (sufixo adicionado pela Cloudflare). URL de produção: `https://my-landing-page-3iz.pages.dev`. Módulo 3 cobre DNS com domínio customizado.
+- ⚠️ **Domínio do cliente:** pendente — depende do discovery. Será configurado no Módulo 3.
 
 ## 🔧 Stack e Convenções
 
-- **Ambiente do dono:** Linux + Zsh, Node via **nvm**. (Sandbox atual: bash, Node 24 pré-instalado, sem nvm como função.)
-- **Ferramentas Cloudflare:** Wrangler CLI (a instalar).
+- **Ambiente do dono:** Linux + Zsh, Node via **asdf** (não nvm). `.tool-versions` na raiz pina Node 23.11.0 para o host; `.nvmrc` pina Node 22 para o build remoto da Cloudflare.
+- **Docker:** fluxo Docker-first para dev local. `compose.yml` com volume anônimo para `node_modules`. App roda exclusivamente no container; host só tem `node_modules` para editor (VS Code). Para adicionar deps: `npm install <pkg> --package-lock-only` no host → `docker compose build` → `docker compose up`.
+- **Ferramentas Cloudflare:** Wrangler CLI instalado globalmente no host (`npm install -g wrangler`). Autenticado via `wrangler login`.
 - **Sensores:** ver `taskfile.yml` (contrato `task lint/typecheck/test/validate`).
 
 ### Como o dono gosta de trabalhar (crítico)
@@ -61,10 +63,28 @@ Dedicação: ~10–15h/semana. Roadmap de aprendizado Cloudflare Pages com **9 m
 - Conectar repo no **painel da Cloudflare** (selecionar conta/projeto).
 - Fornecer dados do cliente/domínio no discovery (ainda não temos).
 
-### Definição de "feito" — Módulo 1
+### Roadmap completo — 9 módulos
 
-Site Astro estático no ar em `https://minha-landing.pages.dev`, deployado pelos **dois** caminhos (Direct Upload e Git), com `.nvmrc` pinado e **build remoto verde**.
+| # | Tema | Carga | Status |
+|---|------|-------|--------|
+| 1 | Fundamentos e primeiro deploy | ~3–4h | ✅ Concluído |
+| 2 | Deploys, previews, ambientes e rollback | ~3h | 🔄 Atual |
+| 3 | Domínios, DNS e TLS | ~4h | — |
+| 4 | Configuração estática avançada | ~3h | — |
+| 5 | Pages Functions (parte dinâmica) | ~5h | — |
+| 6 | Dados no edge: KV, R2, D1 | ~4h | — |
+| 7 | Observabilidade, analytics e segurança | ~3h | — |
+| 8 | CI/CD avançado com Wrangler | ~3h | — |
+| 9 | Convergência para Workers Static Assets | ~4h | — |
 
-### Próximo (Módulo 2 — NÃO agora)
+### Definição de "feito" — Módulo 1 ✅
 
-Preview deployments por branch (link de revisão ao cliente sem tocar produção) + rollback instantâneo.
+Site Astro estático no ar em `https://my-landing-page-3iz.pages.dev`, deployado pelos **dois** caminhos (Direct Upload e integração Git), com `.nvmrc` pinado e **build remoto verde**.
+
+### Módulo 2 — foco atual
+
+Preview deployments por branch (link de revisão ao cliente sem tocar produção) + rollback instantâneo + variáveis de ambiente por ambiente.
+
+### Módulo 3 — DNS e domínio customizado
+
+Conectar domínio do cliente, configurar DNS na Cloudflare (proxied vs DNS-only), TLS automático, HTTPS forçado, redirect www → apex.
