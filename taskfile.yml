@@ -1,0 +1,79 @@
+# taskfile.yml — canonical sensor targets for Sandbox AI projects.
+#
+# Why this file exists:
+#   Agents need a stable, known-location feedback loop. The target names below
+#   are the contract between you and any agent working on this project —
+#   adapt the commands to your stack, keep the names.
+#
+# Target contract:
+#   task fmt        Format sources (optional)
+#   task lint       Run the linter
+#   task typecheck  Run the type checker (omit if N/A for your stack)
+#   task test       Run the test suite
+#   task validate   Composite — lint + typecheck + test. The green-light gate.
+#   task security   Security audit (vulns, secrets, misconfig, SAST). Run
+#                   pre-merge or periodically — not a commit gate.
+#
+# Runner: go-task — https://taskfile.dev — already installed in the sandbox image.
+# Security scanners (trivy, semgrep) are NOT baked — install per project.
+
+version: '3'
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list-all
+
+  # ---------- Sensors ----------
+
+  lint:
+    desc: Run the linter
+    cmds:
+      - |
+        echo "lint not configured — edit taskfile.yml to wire your stack's linter." >&2
+        exit 1
+
+  typecheck:
+    desc: Run the type checker (remove this task if your stack has none)
+    cmds:
+      - |
+        echo "typecheck not configured — edit taskfile.yml or remove this task." >&2
+        exit 1
+
+  test:
+    desc: Run the test suite
+    cmds:
+      - |
+        echo "test not configured — edit taskfile.yml to wire your test runner." >&2
+        exit 1
+
+  # ---------- Composite gate ----------
+
+  validate:
+    desc: Full verification — run before proposing a commit
+    cmds:
+      - task: lint
+      - task: typecheck
+      - task: test
+
+  # ---------- Formatting (optional) ----------
+
+  fmt:
+    desc: Format sources
+    cmds:
+      - |
+        echo "fmt not configured — edit taskfile.yml or remove this task." >&2
+        exit 1
+
+  # ---------- Security (optional, local scanners) ----------
+  #
+  # Default stack: trivy + semgrep. Install per project (brew/apt/pip). Both
+  # run fully local — no cloud telemetry by default. Tune severity as the
+  # project matures; HIGH/CRITICAL is a reasonable starting bar.
+
+  security:
+    desc: Run local security scanners (trivy + semgrep)
+    cmds:
+      - trivy fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 1 .
+      - semgrep --config auto --error --severity ERROR
