@@ -1,5 +1,5 @@
 ---
-
+const isDev = import.meta.env.PUBLIC_DEVELOPMENT === "true";
 ---
 
 <html lang="en">
@@ -12,6 +12,11 @@
 		<title>Astro</title>
 	</head>
 	<body>
-		<h1>Branch: Principal antes do rollback</h1>
+		<h1>Branch: Preview</h1>
+		{isDev && (
+			<div style="background: #ffeb3b; color: #333; padding: 0.5rem 1rem; font-size: 0.85rem;">
+				⚠️ Ambiente de preview — não compartilhe com o cliente final.
+			</div>
+		)}
 	</body>
 </html>
